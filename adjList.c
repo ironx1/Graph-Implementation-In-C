@@ -1,75 +1,90 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define V 4
-
 typedef struct node
 {
-    int i;
+    int v;
     struct node *next;
 } node;
 
-node **adjList = NULL;
-
-node *createNode(int);
-void addEdge(int, int);
-void printGraph();
-
-int main(int argc, char const *argv[])
+typedef struct graph
 {
-    adjList = (node **)malloc(sizeof(node *) * V);
-    for (int i = 0; i < V; i++)
-    {
-        adjList[i] = createNode(i);
-    }
-    addEdge(0,1);
-    addEdge(1,0);
-    addEdge(0,2);
-    addEdge(2,0);
-    addEdge(0,3);
-    addEdge(3,0);
-    addEdge(1,2);
-    addEdge(2,1);
-    printGraph();
-    return 0;
-}
+    int numVer;
+    node **adjList;
+} graph;
 
-node *createNode(int v)
+node *createNode(int vertex)
 {
     node *n = (node *)malloc(sizeof(node));
-    n->i = v;
+    n->v = vertex;
     n->next = NULL;
     return n;
 }
 
-void addEdge(int x, int y)
+graph *createGraph(int v)
 {
-    for (int i = 0; i < V; i++)
+    graph *g = (graph *)malloc(sizeof(graph));
+    g->numVer = v;
+    g->adjList = (node **)malloc(sizeof(node *) * v);
+    for (int i = 0; i < g->numVer; i++)
     {
-        if (x == adjList[i]->i)
+        g->adjList[i] = createNode(i);
+    }
+    return g;
+}
+
+void addEdge(graph *g, int x, int y)
+{
+
+    node *n = createNode(y);
+    node *temp = createNode(x);
+    for (int i = 0; i < g->numVer; i++)
+    {
+        if (x == g->adjList[i]->v)
         {
-            node *iter = adjList[i];
+            node *iter = g->adjList[i];
             while (iter->next != NULL)
             {
                 iter = iter->next;
             }
-            iter->next = createNode(y);
+            iter->next = n;
+        }
+    }
+    for (int i = 0; i < g->numVer; i++)
+    {
+        if (y == g->adjList[i]->v)
+        {
+            node *iter = g->adjList[i];
+            while (iter->next != NULL)
+            {
+                iter = iter->next;
+            }
+            iter->next = temp;
         }
     }
 }
 
-void printGraph()
+void printGraph(graph *g)
 {
-    for (int i = 0; i < V; i++)
+    for (int i = 0; i < g->numVer; i++)
     {
-        node *iter = adjList[i];
-        printf("%d--> ", iter->i);
+        node *iter = g->adjList[i];
         iter = iter->next;
         while (iter != NULL)
         {
-            printf("%d ", iter->i);
+            printf("%d->%d\n", g->adjList[i]->v, iter->v);
             iter = iter->next;
         }
-        printf("\n");
     }
+}
+
+int main(int argc, char const *argv[])
+{
+    graph *myGraph = createGraph(4);
+    addEdge(myGraph, 0, 1);
+    addEdge(myGraph, 0, 2);
+    addEdge(myGraph, 0, 3);
+    addEdge(myGraph, 1, 2);
+    printGraph(myGraph);
+    return 0;
 }
